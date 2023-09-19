@@ -2,6 +2,8 @@
 
 // Read the .env file.
 import * as dotenv from "dotenv";
+import cors from "@fastify/cors";
+
 dotenv.config();
 
 // Require the framework
@@ -13,7 +15,7 @@ const app = Fastify({
 });
 
 // Register your application as a normal plugin.
-app.register(import("../src/index.js"));
+app.register(cors, import("../src/index.js"));
 
 export default async (req, res) => {
   await app.ready();

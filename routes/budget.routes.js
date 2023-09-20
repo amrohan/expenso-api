@@ -100,29 +100,100 @@ const getCurrentMonthBudgetsOfUser = async (request, reply) => {
   }
 };
 
+// const getPerticularMonthData = async (request, reply) => {
+//   try {
+//     const userId = request.query.userId;
+//     let timezone = reply.getHeader("set-timezone");
+//     if (!timezone) {
+//       timezone = "Asia/Kolkata";
+//     }
+//     const startDate = DateTime.fromISO(request.query.startDate).toUTC(); // Parse and convert to UTC
+//     const endDate = DateTime.fromISO(request.query.endDate).toUTC(); // Parse and convert to UTC
+
+//     const startOfMonthIST = startDate
+//       .set({ day: 1, hour: 0, minute: 0, second: 0, millisecond: 0 })
+//       .setZone(timezone);
+
+//     const endOfMonthIST = endDate
+//       .set({ day: 1, month: startDate.month, year: startDate.year })
+//       .plus({ months: 1 })
+//       .minus({ days: 1 })
+//       .set({ hour: 23, minute: 59, second: 59, millisecond: 999 })
+//       .setZone(timezone);
+
+//     const budgets = await BudgetModel.find({
+//       userId,
+//       date: { $gte: startOfMonthIST, $lte: endOfMonthIST },
+//     });
+//     reply.status(200).send({ budgets });
+//   } catch (error) {
+//     reply.status(500).send({ error: error.message });
+//   }
+// };
+
 const getPerticularMonthData = async (request, reply) => {
   try {
+    let totalExpense = 0;
+    let totalIncome = 0;
     const userId = request.query.userId;
-    const timezone = reply.getHeader("set-timezone");
-    const startDate = DateTime.fromISO(request.query.startDate).toUTC(); // Parse and convert to UTC
-    const endDate = DateTime.fromISO(request.query.endDate).toUTC(); // Parse and convert to UTC
+    let timezone = reply.getHeader("set-timezone");
+    if (!timezone) {
+      timezone = "Asia/Kolkata";
+    }
+    const monthName = request.query.monthName;
+    const year = new Date().getFullYear(); // Get the current year
 
-    const startOfMonthIST = startDate
-      .set({ day: 1, hour: 0, minute: 0, second: 0, millisecond: 0 })
-      .setZone(timezone);
+    const monthNamelist = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ];
+    const monthIndex = monthNamelist.indexOf(monthName);
 
-    const endOfMonthIST = endDate
-      .set({ day: 1 })
+    if (monthIndex === -1) {
+      reply.status(400).send({ error: "Invalid month name" });
+      return;
+    }
+
+    const startOfMonthIST = DateTime.fromObject({
+      year,
+      month: monthIndex + 1,
+      day: 1,
+      hour: 0,
+      minute: 0,
+      second: 0,
+      millisecond: 0,
+    }).setZone(timezone);
+
+    const endOfMonthIST = startOfMonthIST
       .plus({ months: 1 })
       .minus({ days: 1 })
       .set({ hour: 23, minute: 59, second: 59, millisecond: 999 })
       .setZone(timezone);
 
-    const budgets = await BudgetModel.find({
+    let budgets = await BudgetModel.find({
       userId,
       date: { $gte: startOfMonthIST, $lte: endOfMonthIST },
+    }).sort({ date: -1 });
+
+    budgets.forEach((budget) => {
+      if (budget.type === "expense") {
+        totalExpense += budget.amount;
+      } else if (budget.type === "income") {
+        totalIncome += budget.amount;
+      }
     });
-    reply.status(200).send({ budgets });
+
+    reply.status(200).send({ budgets, totalExpense, totalIncome });
   } catch (error) {
     reply.status(500).send({ error: error.message });
   }

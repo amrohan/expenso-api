@@ -92,6 +92,7 @@ const getCurrentMonthBudgetsOfUser = async (request, reply) => {
           totalIncome += budget.amount;
         }
       });
+
       reply.status(200).send({ budgets, totalExpense, totalIncome });
     }
   } catch (error) {

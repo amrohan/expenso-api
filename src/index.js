@@ -24,9 +24,6 @@ const fastify = Fastify({
   logger: true,
 });
 
-fastify.register(cors, {
-  origin: "*",
-});
 mongoose
   .connect(connectionUrl, {
     useNewUrlParser: true,
@@ -42,6 +39,7 @@ mongoose
 
 await fastify.register(cors, {
   // put your options here
+  origin: "*",
 });
 
 async function routes(fastify, options) {

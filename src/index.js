@@ -24,6 +24,9 @@ const fastify = Fastify({
   logger: true,
 });
 
+fastify.register(cors, {
+  origin: "*",
+});
 mongoose
   .connect(connectionUrl, {
     useNewUrlParser: true,

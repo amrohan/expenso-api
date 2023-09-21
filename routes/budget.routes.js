@@ -141,7 +141,7 @@ const getPerticularMonthData = async (request, reply) => {
       timezone = "Asia/Kolkata";
     }
     const monthName = request.query.monthName;
-    const year = new Date().getFullYear(); // Get the current year
+    const year = parseInt(request.query.year, 10); // Get the year from the request query as an integer
 
     const monthNamelist = [
       "Jan",
@@ -159,8 +159,8 @@ const getPerticularMonthData = async (request, reply) => {
     ];
     const monthIndex = monthNamelist.indexOf(monthName);
 
-    if (monthIndex === -1) {
-      reply.status(400).send({ error: "Invalid month name" });
+    if (monthIndex === -1 || isNaN(year)) {
+      reply.status(400).send({ error: "Invalid month or year" });
       return;
     }
 

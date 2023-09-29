@@ -41,6 +41,7 @@ const app = Fastify({
 app.register(cors, {
   origin: [
     "http://localhost:3001",
+    "http://localhost:4200/",
     "https://piggysync-api.vercel.app",
     "https://piggysync.vercel.app",
   ],

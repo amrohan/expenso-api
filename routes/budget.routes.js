@@ -180,22 +180,26 @@ const getPerticularMonthData = async (request, reply) => {
       .set({ hour: 23, minute: 59, second: 59, millisecond: 999 })
       .setZone(timezone);
 
-    let budgets = await BudgetModel.find({
+    let transaction = await BudgetModel.find({
       userId,
       date: { $gte: startOfMonthIST, $lte: endOfMonthIST },
     }).sort({ date: -1 });
 
-    budgets.forEach((budget) => {
-      if (budget.type === "expense") {
-        totalExpense += budget.amount;
-      } else if (budget.type === "income") {
-        totalIncome += budget.amount;
+    transaction.forEach((budget) => {
+      if (transaction.type === "expense") {
+        totalExpense += transaction.amount;
+      } else if (transaction.type === "income") {
+        totalIncome += transaction.amount;
       }
     });
 
-    reply.status(200).send({ budgets, totalExpense, totalIncome });
+    reply.status(200).send({ transaction, totalExpense, totalIncome });
   } catch (error) {
     reply.status(500).send({ error: error.message });
+    console.log(
+      "🚀 ~ file: budget.routes.js:199 ~ getPerticularMonthData ~ error.message:",
+      error.message
+    );
   }
 };
 
